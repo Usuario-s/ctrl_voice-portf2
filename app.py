@@ -1,3 +1,4 @@
+
 import os
 import streamlit as st
 from bokeh.models.widgets import Button
@@ -13,7 +14,7 @@ from googletrans import Translator
 
 
 # --------------------------------------------------
-# CONFIGURACIÓN DE STREAMLIT
+# CONFIGURACIÓN
 # --------------------------------------------------
 
 st.set_page_config(
@@ -24,55 +25,36 @@ st.set_page_config(
 
 
 # --------------------------------------------------
-# DISEÑO
+# ESTILO GENERAL
 # --------------------------------------------------
 
 st.markdown("""
 <style>
-
-    /* Fondo general */
     .stApp {
         background: linear-gradient(
-            145deg,
-            #0b0b0b 0%,
-            #151515 60%,
-            #250707 100%
+            145deg, #0b0b0b 0%, #151515 60%, #250707 100%
         );
         color: #ffffff;
     }
 
-    /* Ocultar menú y footer */
-    #MainMenu {
+    #MainMenu, footer {
         visibility: hidden;
     }
 
-    footer {
-        visibility: hidden;
+    header[data-testid="stHeader"] {
+        background: transparent;
     }
 
-    /* Encabezado */
     .block-container {
         max-width: 850px;
         padding-top: 3rem;
         padding-bottom: 3rem;
     }
 
-    /* Título */
-    h1 {
-        color: #ffffff !important;
-    }
-
-    /* Subtítulos */
-    h2, h3 {
-        color: #ffffff !important;
-    }
-
-    /* Texto */
     p {
         color: #d0d0d0;
     }
 
-    /* Línea roja */
     .red-line {
         width: 85px;
         height: 4px;
@@ -81,44 +63,28 @@ st.markdown("""
         border-radius: 5px;
     }
 
-    /* Contenedor del micrófono */
     .mic-container {
         text-align: center;
-        margin-top: 10px;
-        margin-bottom: 15px;
+        margin: 10px 0 15px 0;
     }
 
-    /* Círculo del micrófono */
     .mic-circle {
         width: 125px;
         height: 125px;
-
-        margin-left: auto;
-        margin-right: auto;
-
-        background: linear-gradient(
-            145deg,
-            #351010,
-            #151515
-        );
-
+        margin: 0 auto;
+        background: linear-gradient(145deg, #351010, #151515);
         border: 2px solid #e53935;
         border-radius: 50%;
-
         display: flex;
         align-items: center;
         justify-content: center;
-
-        box-shadow:
-            0 0 25px rgba(229, 57, 53, 0.20),
-            inset 0 0 20px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 0 25px rgba(229, 57, 53, 0.2);
     }
 
     .mic-icon {
         font-size: 55px;
     }
 
-    /* Texto pequeño */
     .status-text {
         text-align: center;
         color: #e53935;
@@ -128,7 +94,14 @@ st.markdown("""
         margin-top: 15px;
     }
 
-    /* Botón */
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        background-color: rgba(25, 25, 25, 0.95);
+        border: 1px solid #3a3a3a;
+        border-top: 3px solid #e53935;
+        border-radius: 18px;
+    }
+
+    /* Botones nativos de Streamlit */
     .stButton > button {
         background-color: #c62828 !important;
         color: white !important;
@@ -142,19 +115,22 @@ st.markdown("""
         box-shadow: 0 0 18px rgba(229, 57, 53, 0.35);
     }
 
-    /* Contenedores */
-    [data-testid="stVerticalBlockBorderWrapper"] {
-        background-color: rgba(25, 25, 25, 0.95);
-        border: 1px solid #3a3a3a;
-        border-top: 3px solid #e53935;
-        border-radius: 18px;
+    /* Contenedor del botón Bokeh */
+    .voice-button-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin: 20px 0;
     }
 
-    /* Caption */
-    .stCaption {
-        color: #e53935 !important;
+    /* Pie de página */
+    .footer-text {
+        text-align: center;
+        color: #666666;
+        font-size: 12px;
+        letter-spacing: 2px;
+        margin-top: 35px;
     }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -170,13 +146,8 @@ def on_publish(client, userdata, result):
 
 def on_message(client, userdata, message):
     global message_received
-
     time.sleep(2)
-
-    message_received = str(
-        message.payload.decode("utf-8")
-    )
-
+    message_received = str(message.payload.decode("utf-8"))
     st.write(message_received)
 
 
@@ -188,7 +159,6 @@ broker = "broker.mqttdashboard.com"
 port = 1883
 
 client1 = paho.Client("GI")
-
 client1.on_message = on_message
 
 
@@ -197,17 +167,14 @@ client1.on_message = on_message
 # --------------------------------------------------
 
 st.markdown(
-    "<h1 style='text-align:center; letter-spacing:3px;'>"
-    "INTERFACES MULTIMODALES"
-    "</h1>",
+    "<h1 style='text-align:center; color:white; "
+    "letter-spacing:3px;'>INTERFACES MULTIMODALES</h1>",
     unsafe_allow_html=True
 )
 
 st.markdown(
     "<p style='text-align:center; color:#e53935; "
-    "font-weight:bold; letter-spacing:5px;'>"
-    "CONTROL POR VOZ"
-    "</p>",
+    "font-weight:bold; letter-spacing:5px;'>CONTROL POR VOZ</p>",
     unsafe_allow_html=True
 )
 
@@ -218,12 +185,11 @@ st.markdown(
 
 
 # --------------------------------------------------
-# TARJETA PRINCIPAL
+# TARJETA DEL MICRÓFONO
 # --------------------------------------------------
 
 with st.container(border=True):
 
-    # Micrófono
     st.markdown("""
         <div class="mic-container">
             <div class="mic-circle">
@@ -232,26 +198,20 @@ with st.container(border=True):
         </div>
     """, unsafe_allow_html=True)
 
-    # Título
     st.markdown(
-        "<h3 style='text-align:center;'>"
-        "Sistema de reconocimiento vocal"
-        "</h3>",
+        "<h3 style='text-align:center; color:white;'>"
+        "Sistema de reconocimiento vocal</h3>",
         unsafe_allow_html=True
     )
 
-    # Descripción
     st.write(
         "Interactúa con la interfaz mediante comandos de voz. "
         "Pulsa el botón de inicio y habla con claridad "
         "para transmitir tu instrucción."
     )
 
-    # Estado
     st.markdown(
-        "<p class='status-text'>"
-        "SISTEMA DE CONTROL POR VOZ"
-        "</p>",
+        "<p class='status-text'>SISTEMA DE CONTROL POR VOZ</p>",
         unsafe_allow_html=True
     )
 
@@ -261,85 +221,77 @@ with st.container(border=True):
 # --------------------------------------------------
 
 image = Image.open("voice_ctrl.jpg")
-
-st.image(
-    image,
-    width=200
-)
+st.image(image, width=200)
 
 
 # --------------------------------------------------
-# INSTRUCCIÓN
+# INSTRUCCIONES
 # --------------------------------------------------
 
 st.markdown(
-    "<p style='text-align:center; color:#bdbdbd;'>"
-    "Toca el botón y habla"
-    "</p>",
+    "<p style='text-align:center;'>"
+    "Pulsa el botón para activar el micrófono y hablar.</p>",
     unsafe_allow_html=True
 )
 
 
 # --------------------------------------------------
-# BOTÓN DE RECONOCIMIENTO DE VOZ
+# BOTÓN BOKEH ESTILIZADO
 # --------------------------------------------------
 
 stt_button = Button(
     label="🎙  INICIAR RECONOCIMIENTO",
-    width=300
+    width=300,
+    height=48,
+    button_type="danger"
 )
 
+stt_button.styles = {
+    "background-color": "#c62828",
+    "color": "#ffffff",
+    "border": "1px solid #e53935",
+    "border-radius": "10px",
+    "font-size": "14px",
+    "font-weight": "bold",
+    "box-shadow": "0 0 12px rgba(229, 57, 53, 0.2)"
+}
 
 stt_button.js_on_event(
     "button_click",
     CustomJS(code="""
-
         var recognition = new webkitSpeechRecognition();
 
         recognition.continuous = true;
         recognition.interimResults = true;
+        recognition.lang = "es-CO";
 
         recognition.onresult = function (e) {
-
             var value = "";
 
-            for (
-                var i = e.resultIndex;
-                i < e.results.length;
-                ++i
-            ) {
-
+            for (var i = e.resultIndex; i < e.results.length; ++i) {
                 if (e.results[i].isFinal) {
-
                     value += e.results[i][0].transcript;
-
                 }
-
             }
 
             if (value != "") {
-
                 document.dispatchEvent(
-                    new CustomEvent(
-                        "GET_TEXT",
-                        {
-                            detail: value
-                        }
-                    )
+                    new CustomEvent("GET_TEXT", {detail: value})
                 );
-
             }
+        };
 
-        }
+        recognition.onerror = function (e) {
+            console.error("Error de reconocimiento:", e.error);
+        };
 
         recognition.start();
-
     """)
 )
 
 
 # --------------------------------------------------
-# EVENTO DE STREAMLIT BOKEH
+# MOSTRAR BOTÓN Y ESCUCHAR EVENTOS
 # --------------------------------------------------
 
 result = streamlit_bokeh_events(
@@ -353,52 +305,28 @@ result = streamlit_bokeh_events(
 
 
 # --------------------------------------------------
-# RESULTADO DEL RECONOCIMIENTO
+# PROCESAR RESULTADO Y PUBLICAR POR MQTT
 # --------------------------------------------------
 
 if result:
-
     if "GET_TEXT" in result:
+        texto_reconocido = result.get("GET_TEXT")
 
-        st.write(
-            result.get("GET_TEXT")
-        )
+        st.markdown("### Texto reconocido")
+        st.write(texto_reconocido)
 
-        # Callback MQTT
         client1.on_publish = on_publish
+        client1.connect(broker, port)
 
-        # Conexión
-        client1.connect(
-            broker,
-            port
-        )
+        message = json.dumps({
+            "Act1": texto_reconocido.strip()
+        })
 
-        # Crear mensaje
-        message = json.dumps(
-            {
-                "Act1": result.get(
-                    "GET_TEXT"
-                ).strip()
-            }
-        )
-
-        # Publicar mensaje
-        ret = client1.publish(
-            "voice",
-            message
-        )
-
-
-    # --------------------------------------------------
-    # CREAR CARPETA TEMP
-    # --------------------------------------------------
+        ret = client1.publish("voice", message)
 
     try:
-
         os.mkdir("temp")
-
     except:
-
         pass
 
 
@@ -406,13 +334,8 @@ if result:
 # PIE DE PÁGINA
 # --------------------------------------------------
 
-st.markdown(
-    "<p style='text-align:center; "
-    "color:#555555; "
-    "font-size:12px; "
-    "letter-spacing:2px; "
-    "margin-top:35px;'>"
-    "MULTIMODAL INTERFACE · VOICE CONTROL"
-    "</p>",
-    unsafe_allow_html=True
-)
+st.markdown("""
+    <p class="footer-text">
+        MULTIMODAL INTERFACE · VOICE CONTROL
+    </p>
+""", unsafe_allow_html=True)
