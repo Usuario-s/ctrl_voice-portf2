@@ -1,4 +1,5 @@
 
+
 import os
 import streamlit as st
 from bokeh.models.widgets import Button
@@ -14,7 +15,7 @@ from googletrans import Translator
 
 
 # --------------------------------------------------
-# CONFIGURACIÓN
+# CONFIGURACIÓN DE STREAMLIT
 # --------------------------------------------------
 
 st.set_page_config(
@@ -25,19 +26,23 @@ st.set_page_config(
 
 
 # --------------------------------------------------
-# ESTILO GENERAL
+# DISEÑO GENERAL
 # --------------------------------------------------
 
 st.markdown("""
 <style>
     .stApp {
         background: linear-gradient(
-            145deg, #0b0b0b 0%, #151515 60%, #250707 100%
+            145deg,
+            #0b0b0b 0%,
+            #151515 60%,
+            #250707 100%
         );
         color: #ffffff;
     }
 
-    #MainMenu, footer {
+    #MainMenu,
+    footer {
         visibility: hidden;
     }
 
@@ -72,7 +77,11 @@ st.markdown("""
         width: 125px;
         height: 125px;
         margin: 0 auto;
-        background: linear-gradient(145deg, #351010, #151515);
+        background: linear-gradient(
+            145deg,
+            #351010,
+            #151515
+        );
         border: 2px solid #e53935;
         border-radius: 50%;
         display: flex;
@@ -115,15 +124,16 @@ st.markdown("""
         box-shadow: 0 0 18px rgba(229, 57, 53, 0.35);
     }
 
-    /* Contenedor del botón Bokeh */
-    .voice-button-container {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-        margin: 20px 0;
+    /* Botón de Bokeh */
+    .voice-mic-button {
+        background-color: #c62828 !important;
+        color: #ffffff !important;
+        border: 1px solid #e53935 !important;
+        border-radius: 10px !important;
+        font-weight: bold !important;
+        box-shadow: 0 0 12px rgba(229, 57, 53, 0.2);
     }
 
-    /* Pie de página */
     .footer-text {
         text-align: center;
         color: #666666;
@@ -146,13 +156,18 @@ def on_publish(client, userdata, result):
 
 def on_message(client, userdata, message):
     global message_received
+
     time.sleep(2)
-    message_received = str(message.payload.decode("utf-8"))
+
+    message_received = str(
+        message.payload.decode("utf-8")
+    )
+
     st.write(message_received)
 
 
 # --------------------------------------------------
-# MQTT
+# CONFIGURACIÓN MQTT
 # --------------------------------------------------
 
 broker = "broker.mqttdashboard.com"
@@ -168,13 +183,17 @@ client1.on_message = on_message
 
 st.markdown(
     "<h1 style='text-align:center; color:white; "
-    "letter-spacing:3px;'>INTERFACES MULTIMODALES</h1>",
+    "letter-spacing:3px;'>"
+    "INTERFACES MULTIMODALES"
+    "</h1>",
     unsafe_allow_html=True
 )
 
 st.markdown(
     "<p style='text-align:center; color:#e53935; "
-    "font-weight:bold; letter-spacing:5px;'>CONTROL POR VOZ</p>",
+    "font-weight:bold; letter-spacing:5px;'>"
+    "CONTROL POR VOZ"
+    "</p>",
     unsafe_allow_html=True
 )
 
@@ -185,7 +204,7 @@ st.markdown(
 
 
 # --------------------------------------------------
-# TARJETA DEL MICRÓFONO
+# TARJETA PRINCIPAL
 # --------------------------------------------------
 
 with st.container(border=True):
@@ -200,7 +219,8 @@ with st.container(border=True):
 
     st.markdown(
         "<h3 style='text-align:center; color:white;'>"
-        "Sistema de reconocimiento vocal</h3>",
+        "Sistema de reconocimiento vocal"
+        "</h3>",
         unsafe_allow_html=True
     )
 
@@ -211,7 +231,9 @@ with st.container(border=True):
     )
 
     st.markdown(
-        "<p class='status-text'>SISTEMA DE CONTROL POR VOZ</p>",
+        "<p class='status-text'>"
+        "SISTEMA DE CONTROL POR VOZ"
+        "</p>",
         unsafe_allow_html=True
     )
 
@@ -230,36 +252,45 @@ st.image(image, width=200)
 
 st.markdown(
     "<p style='text-align:center;'>"
-    "Pulsa el botón para activar el micrófono y hablar.</p>",
+    "Pulsa el botón para activar el micrófono y hablar."
+    "</p>",
     unsafe_allow_html=True
 )
 
 
 # --------------------------------------------------
-# BOTÓN BOKEH ESTILIZADO
+# BOTÓN DE RECONOCIMIENTO DE VOZ
 # --------------------------------------------------
 
 stt_button = Button(
-    label="🎙  INICIAR RECONOCIMIENTO",
+    label="🎙 INICIAR RECONOCIMIENTO",
     width=300,
     height=48,
-    button_type="danger"
+    button_type="danger",
+    css_classes=["voice-mic-button"]
 )
 
-stt_button.styles = {
-    "background-color": "#c62828",
-    "color": "#ffffff",
-    "border": "1px solid #e53935",
-    "border-radius": "10px",
-    "font-size": "14px",
-    "font-weight": "bold",
-    "box-shadow": "0 0 12px rgba(229, 57, 53, 0.2)"
-}
+
+# --------------------------------------------------
+# RECONOCIMIENTO DE VOZ CON JAVASCRIPT
+# --------------------------------------------------
 
 stt_button.js_on_event(
     "button_click",
     CustomJS(code="""
-        var recognition = new webkitSpeechRecognition();
+        var SpeechRecognition =
+            window.SpeechRecognition ||
+            window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+            alert(
+                "Tu navegador no admite reconocimiento de voz. "
+                + "Prueba con Google Chrome."
+            );
+            return;
+        }
+
+        var recognition = new SpeechRecognition();
 
         recognition.continuous = true;
         recognition.interimResults = true;
@@ -268,21 +299,31 @@ stt_button.js_on_event(
         recognition.onresult = function (e) {
             var value = "";
 
-            for (var i = e.resultIndex; i < e.results.length; ++i) {
+            for (
+                var i = e.resultIndex;
+                i < e.results.length;
+                ++i
+            ) {
                 if (e.results[i].isFinal) {
                     value += e.results[i][0].transcript;
                 }
             }
 
-            if (value != "") {
+            if (value.trim() !== "") {
                 document.dispatchEvent(
-                    new CustomEvent("GET_TEXT", {detail: value})
+                    new CustomEvent(
+                        "GET_TEXT",
+                        {detail: value.trim()}
+                    )
                 );
             }
         };
 
         recognition.onerror = function (e) {
-            console.error("Error de reconocimiento:", e.error);
+            console.error(
+                "Error de reconocimiento:",
+                e.error
+            );
         };
 
         recognition.start();
@@ -291,7 +332,7 @@ stt_button.js_on_event(
 
 
 # --------------------------------------------------
-# MOSTRAR BOTÓN Y ESCUCHAR EVENTOS
+# MOSTRAR BOTÓN Y RECIBIR EVENTOS
 # --------------------------------------------------
 
 result = streamlit_bokeh_events(
@@ -310,23 +351,29 @@ result = streamlit_bokeh_events(
 
 if result:
     if "GET_TEXT" in result:
+
         texto_reconocido = result.get("GET_TEXT")
 
         st.markdown("### Texto reconocido")
         st.write(texto_reconocido)
 
         client1.on_publish = on_publish
+
         client1.connect(broker, port)
 
         message = json.dumps({
             "Act1": texto_reconocido.strip()
         })
 
-        ret = client1.publish("voice", message)
+        ret = client1.publish(
+            "voice",
+            message
+        )
 
+    # Crear carpeta temporal si no existe
     try:
         os.mkdir("temp")
-    except:
+    except FileExistsError:
         pass
 
 
@@ -339,3 +386,4 @@ st.markdown("""
         MULTIMODAL INTERFACE · VOICE CONTROL
     </p>
 """, unsafe_allow_html=True)
+
